@@ -1,0 +1,143 @@
+<div class="container mt-5">
+    <h1 class="text-center">Task Manager</h1>
+    <div class="row justify-content-between mb-3">
+        <div class="col-auto">
+            <input type="text" class="form-control" placeholder="Search tasks..." [(ngModel)]="searchTerm" />
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#task_create_edit"
+                (click)="setAction('create','')">Add Task</button>
+            <button class="btn btn-outline-secondary" (click)="toggleView()">
+                <i class="mdi" [ngClass]="gridView ? 'mdi-table' : 'mdi-view-grid'"></i> Toggle View
+            </button>
+        </div>
+    </div>
+
+    <!-- Card View -->
+    <div class="row" *ngIf="gridView">
+        @for (task of tasks | filterItems: searchTerm; track task._id){
+        <div class="col-lg-4 col-md-6">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ task.title }}</h5>
+                    <p class="card-text">{{ task.description }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button class="btn" [ngClass]="task.status === 'completed' ? 'btn-success' : 'btn-warning'"
+                            (click)="toggleStatus(task)">
+                            {{ task.status === 'completed' ? 'Completed' : 'Pending' }}
+                        </button>
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#task_delete"
+                            (click)="setAction('delete',task)">
+                            <i class="mdi mdi-trash-can-outline mr-2"></i>Delete</button>
+                        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#task_create_edit"
+                            (click)="setAction('update',task)"><i class="mdi mdi-pencil-outline"></i> Edit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        }@empty{
+        <h3>No Task Available</h3>
+        }
+    </div>
+
+    <!-- Table View -->
+    <div class="table-responsive" *ngIf="!gridView">
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width: 5%;">S No.</th>
+                    <th style="width: 15%">Title</th>
+                    <th style="width: 50%">Description</th>
+                    <th style="width: 15%">Status</th>
+                    <th style="width: 25%">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let task of tasks | filterItems: searchTerm; trackBy: trackByIndex; let i=index">
+                    <td>{{i+1}}</td>
+                    <td>{{ task.title }}</td>
+                    <td>{{ task.description }}</td>
+                    <td>
+                        <span class="badge" [ngClass]="task.status === 'completed' ? 'bg-success' : 'bg-warning'">
+                            {{ task.status | uppercase }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-success me-2" (click)="toggleStatus(task)" data-bs-toggle="tooltip" title="Toggle Status">
+                            <i class="mdi" [ngClass]="task.status === 'completed' ? 'mdi-check-circle-outline' : 'mdi-checkbox-blank-circle-outline'"></i>
+                        </button>
+                        <button class="btn btn-info me-2" data-bs-toggle="modal" data-bs-target="#task_create_edit"
+                            (click)="setAction('update', task)" data-bs-toggle="tooltip" title="Edit Task">
+                            <i class="mdi mdi-pencil-outline"></i>
+                        </button>
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#task_delete"
+                            (click)="setAction('delete', task)" data-bs-toggle="tooltip" title="Delete Task">
+                            <i class="mdi mdi-trash-can-outline"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Task Modal -->
+<div class="modal center-modal fade" id="task_create_edit" tabindex="-1" data-backdrop="false" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    @if(actionType==='create'){
+                    Add New Task
+                    }@else{
+                    Update Task
+                    }</h5>
+                <button type="button" class="btn-close" #closeAddUpdateModal data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-10 overflow-auto">
+                <form (ngSubmit)="actionOnTask()" [formGroup]="taskForm">
+                    <div class="mb-3">
+                        <label for="taskTitle" class="form-label">Title</label>
+                        <input type="text" id="taskTitle" class="form-control" formControlName="title" name="title"
+                            required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskDescription" class="form-label">Description</label>
+                        <textarea id="taskDescription" class="form-control" formControlName="description"
+                            name="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer modal-footer-uniform">
+                <button type="submit" class="btn btn-primary" (click)="actionOnTask()">
+                    @if(actionType==='create'){
+                    Create
+                    }@else{
+                    Save
+                    }
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Task Modal -->
+<div class="modal center-modal fade" id="task_delete" tabindex="-1" data-backdrop="false" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Task</h5>
+                <button type="button" #closeDeleteModal class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-10 overflow-auto">
+                Do you want to delete this task?
+            </div>
+            <div class="modal-footer modal-footer-uniform">
+                <button type="submit" class="btn btn-danger" (click)="deleteTask()">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
