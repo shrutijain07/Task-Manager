@@ -1,11 +1,5 @@
 {
     "version": 2,
-    "rewrites": [
-        {
-          "source": "/api/(.*)",
-          "destination": "https://backend-task-manager-pi.vercel.app/api/$1"
-        }
-      ],    
     "builds": [
       {
         "src": "dist/**/*",
