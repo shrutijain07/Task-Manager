@@ -26,3 +26,7 @@
     word-break: break-all;
   }
   
+.required-field::after {
+  content: "*";
+  color: red;
+}

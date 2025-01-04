@@ -63,15 +63,17 @@
                         </span>
                     </td>
                     <td>
-                        <button class="btn btn-success me-2" (click)="toggleStatus(task)" data-bs-toggle="tooltip" title="Toggle Status">
-                            <i class="mdi" [ngClass]="task.status === 'completed' ? 'mdi-check-circle-outline' : 'mdi-checkbox-blank-circle-outline'"></i>
+                        <button class="btn btn-success me-2" (click)="toggleStatus(task)" data-bs-toggle="tooltip"
+                            title="Toggle Status">
+                            <i class="mdi"
+                                [ngClass]="task.status === 'completed' ? 'mdi-check-circle-outline' : 'mdi-checkbox-blank-circle-outline'"></i>
                         </button>
                         <button class="btn btn-info me-2" data-bs-toggle="modal" data-bs-target="#task_create_edit"
-                            (click)="setAction('update', task)" data-bs-toggle="tooltip" title="Edit Task">
+                            (click)="setAction('update', task)">
                             <i class="mdi mdi-pencil-outline"></i>
                         </button>
                         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#task_delete"
-                            (click)="setAction('delete', task)" data-bs-toggle="tooltip" title="Delete Task">
+                            (click)="setAction('delete', task)">
                             <i class="mdi mdi-trash-can-outline"></i>
                         </button>
                     </td>
@@ -97,14 +99,27 @@
             <div class="modal-body p-10 overflow-auto">
                 <form (ngSubmit)="actionOnTask()" [formGroup]="taskForm">
                     <div class="mb-3">
-                        <label for="taskTitle" class="form-label">Title</label>
+                        <label for="taskTitle" class="form-label required-field">Title</label>
                         <input type="text" id="taskTitle" class="form-control" formControlName="title" name="title"
-                            required />
+                            required [class.is-invalid]="taskForm.get('title')?.invalid && taskForm.get('title')?.touched"/>
+                        <div *ngIf="taskForm.get('title')?.touched && taskForm.get('title')?.invalid"
+                            class="text-danger">
+                            <small *ngIf="taskForm.get('title')?.errors?.['required']">
+                                Title is required.
+                            </small>
+                        </div>
                     </div>
                     <div class="mb-3">
-                        <label for="taskDescription" class="form-label">Description</label>
+                        <label for="taskDescription" class="form-label required-field">Description</label>
                         <textarea id="taskDescription" class="form-control" formControlName="description"
-                            name="description" rows="3"></textarea>
+                            name="description" rows="3" [class.is-invalid]="taskForm.get('description')?.invalid && taskForm.get('description')?.touched"></textarea>
+                        <div *ngIf="taskForm.get('description')?.touched && taskForm.get('description')?.invalid"
+                            class="text-danger">
+                            <small *ngIf="taskForm.get('description')?.errors?.['required']">
+                                Description is required.
+                            </small>
+                        </div>
+
                     </div>
                 </form>
             </div>

@@ -10,30 +10,31 @@ declare var bootstrap: any;
 
 @Component({
   selector: 'app-tasks',
-  imports: [ReactiveFormsModule,FormsModule,CommonModule,FilterPipe],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, FilterPipe],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss'
 })
 export class TasksComponent implements AfterViewInit {
   @ViewChild('closeAddUpdateModal') closeAddUpdateModal: any;
   @ViewChild('closeDeleteModal') closeDeleteModal: any;
-  
-  tasks: Task[] = [];
-  APISubscription:Subscription[]=[];
-  taskForm: any;
-  searchTerm=''
-  actionType: string='';
-  task_id: any;
-  gridView: boolean=false;
 
-  constructor(private taskService: TaskService,private formBuilder: UntypedFormBuilder,private toastr: ToastrService,) {}
+  tasks: Task[] = [];
+  APISubscription: Subscription[] = [];
+  taskForm: any;
+  searchTerm = ''
+  actionType: string = '';
+  task_id: any;
+  gridView: boolean = false;
+  submitted: boolean = false;
+
+  constructor(private taskService: TaskService, private formBuilder: UntypedFormBuilder, private toastr: ToastrService,) { }
 
   ngOnInit(): void {
     this.taskForm = this.formBuilder.group({
       title: ['true', Validators.required],
       description: ['', Validators.required],
     });
-     this.fetchTasks();
+    this.fetchTasks();
   }
 
   ngAfterViewInit() {
@@ -43,14 +44,14 @@ export class TasksComponent implements AfterViewInit {
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
   }
-  setAction(action_value:string,task:any){
+  setAction(action_value: string, task: any) {
     this.actionType = action_value
     this.task_id = task?._id
     this.taskForm.reset()
-    if(action_value === 'update'){
+    if (action_value === 'update') {
       this.taskForm.patchValue({
-        title:task.title,
-        description:task.description
+        title: task.title,
+        description: task.description
       })
     }
   }
@@ -60,7 +61,6 @@ export class TasksComponent implements AfterViewInit {
   }
 
   trackByIndex = (index: number): number => {
-    console.log('%c [ index ]-55', 'font-size:13px; background:pink; color:#bf2c9f;', index)
     return index;
   };
 
@@ -72,7 +72,7 @@ export class TasksComponent implements AfterViewInit {
 
   toggleStatus(task: Task): void {
     const updatedTask = { ...task, status: task.status === 'pending' ? 'completed' : 'pending' };
-    this.APISubscription.push(this.taskService.updateTask(task._id!,updatedTask).subscribe(result => {
+    this.APISubscription.push(this.taskService.updateTask(task._id!, updatedTask).subscribe(result => {
       this.toastr.success('Task Status Updated Successfully', '', { timeOut: 3000 });
       this.fetchTasks()
     }))
@@ -87,28 +87,31 @@ export class TasksComponent implements AfterViewInit {
   }
 
   actionOnTask(): void {
+    if (this.taskForm.invalid) {
+      return
+    }
     let data = {
       title: this.taskForm?.value.title,
       description: this.taskForm?.value.description,
     };
-    if(this.actionType==='create'){
+    if (this.actionType === 'create') {
       this.APISubscription.push(this.taskService.addTask(data).subscribe(result => {
         this.closeAddUpdateModal.nativeElement.click();
         this.toastr.success('Task Created Successfully', '', { timeOut: 3000 });
         this.fetchTasks()
       }))
-    }else{
-      this.APISubscription.push(this.taskService.updateTask(this.task_id,data).subscribe(result => {
+    } else {
+      this.APISubscription.push(this.taskService.updateTask(this.task_id, data).subscribe(result => {
         this.closeAddUpdateModal.nativeElement.click();
         this.toastr.success('Task Updated Successfully', '', { timeOut: 3000 });
         this.fetchTasks()
       }))
     }
-    
+
   }
-  ngOnDestroy():void{
-    if(this.APISubscription.length !== 0){
-      this.APISubscription.forEach((s) => s.unsubscribe());  
+  ngOnDestroy(): void {
+    if (this.APISubscription.length !== 0) {
+      this.APISubscription.forEach((s) => s.unsubscribe());
     }
   }
 }
