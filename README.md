@@ -1,4 +1,4 @@
-# Frontend for [Your Project Name]
+# Frontend for Task Manager
 
 This repository contains the frontend code for Task Manaager, built using **Angular**. The frontend interacts with the backend APIs and provides a user-friendly interface for seamless interaction.
 
